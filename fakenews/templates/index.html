@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Quiz</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        body {
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem;
+        }
+
+        .box {
+            max-width: 700px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .question {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .correct {
+            color: #198754;
+        }
+
+        .incorrect {
+            color: #dc3545;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <!--css for webs-->
+
+</head>
+
+<body>
+    <section class="section">
+        <div class="container">
+            <div class="box has-text-centered">
+                <h1 class="title is-2 has-text-primary">📰 Fake News Quiz 📰</h1>
+
+                <div class="question">
+                    {{ randomnews }}
+                </div>
+
+                <div id="answer" class="hidden"
+                    data-answer="{{ 'True' if trueorfalse in ['True'] else 'False' }}">
+                </div>
+                <!--this is the if statement that determines if the answer is true or not-->
+
+                <div class="buttons is-centered">
+                    <button class="button is-link is-medium" onclick="checkAnswer('True')">True</button>
+                    <button class="button is-dark is-medium" onclick="checkAnswer('False')">False</button>
+                    <!--buttons with the onclick event to activate the java script-->
+                </div>
+
+<div id="textField" style="display: none;">
+    <a href="{{link}}" target="_blank">view the newspage</a>
+</div>
+<!--div statement too display the link-->
+
+<div class="result" id="result"></div>
+<div class="score" id="score">Score: {{ score }}</div>
+<!--div statement to display the score-->
+
+                        <a class="button is-link is-large mt-4" href="/game">next news title</a>
+                        <!--button to get another news article for sakipping questions or gooing to the next one-->
+
+                <div class="result" id="result"></div>
+            </div>
+        </div>
+
+
+    </section>
+
+
+
+<script>
+    function checkAnswer(userChoice) {
+        const stored = document.getElementById('answer').dataset.answer;
+        //this has the answer of the question stored into it 
+
+        fetch("/check_answer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ choice: userChoice, correct: stored })
+        })
+        //fetchs data from the flask app as a JSON
+
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('result');
+            const scoreDiv = document.getElementById('score');
+
+            if (data.is_correct) {
+                resultDiv.textContent = '✅ Correct!';
+                resultDiv.className = 'result correct';
+                //if the data is correct this is put on screen
+
+            } else {
+                resultDiv.textContent = `❌ Incorrect. The correct answer is ${stored}.`;
+                resultDiv.className = 'result incorrect';
+                //if incorrect this is shown 
+            }
+
+            scoreDiv.textContent = `Score: ${data.score}`;
+            //this is the part of the script that makes the score update
+
+            document.querySelector('button[onclick="checkAnswer(\'True\')"]').disabled = true;
+            document.querySelector('button[onclick="checkAnswer(\'False\')"]').disabled = true;
+            //once one of the buttons is pressed the other one is disabled to avoid someone changing their answer 
+
+            document.getElementById("textField").style.display = "block";
+            //once a button is pressed the link appears on the screen to send them to the original article
+        });
+    }
+</script>
+
+
+</body>
+
+</html>
