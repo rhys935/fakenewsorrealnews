@@ -2,13 +2,12 @@
 from flask import Flask, render_template, jsonify, request, session, url_for, redirect
 import sqlite3
 import random
-from flask_session import Session
 
 app = Flask(__name__)
 
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
+app.secret_key="HelloRhys"
 #configuration for the session
 
 @app.route("/game")
